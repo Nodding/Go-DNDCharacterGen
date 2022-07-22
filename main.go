@@ -8,7 +8,9 @@ import (
 	"os"
 	// this allows users to flag their command line args (like -pname Lucca)
 	"flag"
+	// allows the logging of our errors (currently just for the api call)
 	"log"
+	// used to make the http.get request to the api
 	"net/http"
 )
 
