@@ -17,6 +17,11 @@ import (
 
 	//used for random rolling
 	"math/rand"
+	//allows us to parse the json the api sends over
+	"encoding/json"
+	//allows us to take the httpresponse and make the body (or information) into a byte array
+	"bytes"
+	"io/ioutil"
 )
 
 //doesn't round down properly on the lower ones? shouldn't matter when stat rolling is un-simplified
@@ -107,7 +112,39 @@ func api(url string) {
 		log.Fatal(err)
 	}
 
-	//since there was no error, we can go ahead and print out the information.
-	//in the future, we need to actually parse what they give us to extract the information out.
-	fmt.Println(response)
+	//this grabs the body of information, and attempts to read it.
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	//this converts the byte array into a string and prints it. This contains all the race information.
+	toprint := bytes.NewBuffer(body).String()
+	fmt.Println(toprint)
 }
+
+// RACE API CALL CONSTRUCTORs
+type Race struct {
+}
+
+type RaceAPIResponse struct {
+	ExecutionTime string `json:"executionTime"`
+	RaceInfoList  []Race `json:"RaceInfoList"`
+}
+
+// this parses the body of the httpresponse, and the error if it gets one.
+func getRaceInfo(body []byte) (*RaceAPIResponse, error) {
+	var s = new(RaceAPIResponse)
+	//takes the json to a readable format
+	//TODO look into json unmarshal command to see what it does.
+	err := json.Unmarshal(body, &s)
+	if err != nil {
+		fmt.Println("whoops:", err)
+	}
+	return s, err
+}
+
+//API DOCS
+//Api to bytearray https://blog.josephmisiti.com/parsing-json-responses-in-golang
+//byte array to json? https://stackoverflow.com/questions/45756011/parse-json-http-response-using-golang
+//byte array to string https://golangdocs.com/golang-byte-array-to-string
